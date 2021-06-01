@@ -1,3 +1,5 @@
+import bangazon_reports
+from django.urls import path
 from django.conf import settings
 from django.conf.urls import url, include
 from django.conf.urls.static import static
@@ -23,6 +25,7 @@ router.register(r'profile', Profile, 'profile')
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     url(r'^', include(router.urls)),
+    path('', include('bangazon_reports.urls')),
     url(r'^register$', register_user),
     url(r'^login$', login_user),
     url(r'^api-token-auth$', obtain_auth_token),
