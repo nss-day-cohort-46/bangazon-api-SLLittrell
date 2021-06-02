@@ -34,8 +34,8 @@ class Payments(ViewSet):
         new_payment = Payment()
         new_payment.merchant_name = request.data["merchant_name"]
         new_payment.account_number = request.data["account_number"]
-        new_payment.expiration_date = request.data["create_date"]
-        new_payment.create_date = request.data["expiration_date"]
+        new_payment.expiration_date = request.data["expiration_date"]
+        new_payment.create_date = request.data["create_date"]
         customer = Customer.objects.get(user=request.auth.user)
         new_payment.customer = customer
         new_payment.save()
@@ -45,6 +45,19 @@ class Payments(ViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def update(self, request, pk=None):
+        update_payment = Payment.objects.get(pk=pk)
+        update_payment.merchant_name = request.data["merchant_name"]
+        update_payment.account_number = request.data["account_number"]
+        update_payment.expiration_date = request.data["expiration_date"]
+        update_payment.create_date = request.data["create_date"]
+        customer = Customer.objects.get(user=request.auth.user)
+        update_payment.customer = customer
+        update_payment.save()
+
+
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
+    
     def retrieve(self, request, pk=None):
         """Handle GET requests for single payment type
 
