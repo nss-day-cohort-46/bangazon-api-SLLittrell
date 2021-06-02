@@ -1,5 +1,6 @@
 """View module for handling requests about products"""
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from bangazonapi.models.recommendation import Recommendation
 import base64
 from django.core.files.base import ContentFile
@@ -110,13 +111,18 @@ class Products(ViewSet):
             data = ContentFile(base64.b64decode(imgstr), name=f'{new_product.id}-{request.data["name"]}.{ext}')
 
             new_product.image_path = data
+        new_product.clean_fields(exclude= "image_path")
+        try:
+            new_product.save()
 
-        new_product.save()
+            serializer = ProductSerializer(
+                new_product, context={'request': request})
 
-        serializer = ProductSerializer(
-            new_product, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        except:
+            return ValidationError()
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def retrieve(self, request, pk=None):
         """
