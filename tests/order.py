@@ -1,4 +1,5 @@
 import json
+import datetime
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -25,6 +26,18 @@ class OrderTests(APITestCase):
         # Create a product
         url = "/products"
         data = { "name": "Kite", "price": 14.99, "quantity": 60, "description": "It flies high", "category_id": 1, "location": "Pittsburgh" }
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Create a payment type
+        url = '/paymenttypes'
+        data = {
+            "merchant_name": "American Express",
+            "account_number": "111-1111-1111",
+            "expiration_date": "2024-12-31",
+            "create_date": datetime.date.today()
+        }
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -80,5 +93,24 @@ class OrderTests(APITestCase):
         self.assertEqual(len(json_response["lineitems"]), 0)
 
     # TODO: Complete order by adding payment type
+    def test_add_payment_type(self):
+        """ Ensure a payment type can be added to an order """
+        
+        self.test_add_product_to_order()
+
+        url = "/orders/1"
+        data = { "payment_type": 1 }
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+        response = self.client.put(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        url = "/orders/1"
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+        response = self.client.get(url, None, format='json')
+        json_response = json.loads(response.content)
+
+        self.assertEqual(json_response["payment_type"], response.data['payment_type'] )
+        
 
     # TODO: New line item is not added to closed order
