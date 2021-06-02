@@ -34,8 +34,8 @@ class Payments(ViewSet):
         new_payment = Payment()
         new_payment.merchant_name = request.data["merchant_name"]
         new_payment.account_number = request.data["account_number"]
-        new_payment.expiration_date = request.data["create_date"]
-        new_payment.create_date = request.data["expiration_date"]
+        new_payment.expiration_date = request.data["expiration_date"]
+        new_payment.create_date = request.data["create_date"]
         customer = Customer.objects.get(user=request.auth.user)
         new_payment.customer = customer
         new_payment.save()
@@ -45,6 +45,19 @@ class Payments(ViewSet):
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def update(self, request, pk=None):
+        update_payment = Payment.objects.get(pk=pk)
+        update_payment.merchant_name = request.data["merchant_name"]
+        update_payment.account_number = request.data["account_number"]
+        update_payment.expiration_date = request.data["expiration_date"]
+        update_payment.create_date = request.data["create_date"]
+        customer = Customer.objects.get(user=request.auth.user)
+        update_payment.customer = customer
+        update_payment.save()
+
+
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
+    
     def retrieve(self, request, pk=None):
         """Handle GET requests for single payment type
 
@@ -79,12 +92,10 @@ class Payments(ViewSet):
 
     def list(self, request):
         """Handle GET requests to payment type resource"""
-        payment_types = Payment.objects.all()
+        current_user = Customer.objects.get(user=request.auth.user)
+        
+        payment_types = Payment.objects.filter(customer_id=current_user.user.id)
 
-        customer_id = self.request.query_params.get('customer', None)
-
-        if customer_id is not None:
-            payment_types = payment_types.filter(customer__id=customer_id)
 
         serializer = PaymentSerializer(
             payment_types, many=True, context={'request': request})
