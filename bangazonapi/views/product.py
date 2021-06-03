@@ -1,4 +1,5 @@
 """View module for handling requests about products"""
+from bangazonapi.models.rating import Rating
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from bangazonapi.models.recommendation import Recommendation
@@ -9,7 +10,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
-from bangazonapi.models import Product, Customer, ProductCategory
+from bangazonapi.models import Product, Customer, ProductCategory, ProductRating
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.parsers import MultiPartParser, FormParser
 
@@ -353,3 +354,18 @@ class Products(ViewSet):
                 return Response(serializer.data)
             except Exception as ex:
                 return HttpResponseServerError(ex, status = status.HTTP_404_NOT_FOUND)
+
+    @action(method =['post'], detail= True)
+    def rate(self,request, pk=None):
+        if request.method == "POST":
+            rate = ProductRating()
+            rate.customer = Customer.objects.get(user=request.auth.user)
+            rate.rating = request.data['rating']
+
+        try:
+            rate.save()
+
+            return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+        except Exception:
+            return Response(None, status=status.HTTP_405_METHOD_NOT_ALLOWED)
