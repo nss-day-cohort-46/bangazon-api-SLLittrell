@@ -262,9 +262,11 @@ class Products(ViewSet):
 
         # Support filtering by category and/or quantity
         category = self.request.query_params.get('category', None)
+        price = self.request.query_params.get('price', None)
         quantity = self.request.query_params.get('quantity', None)
         order = self.request.query_params.get('order_by', None)
         direction = self.request.query_params.get('direction', None)
+        location = self.request.query_params.get('location', None)
         number_sold = self.request.query_params.get('number_sold', None)
 
         if order is not None:
@@ -281,6 +283,17 @@ class Products(ViewSet):
 
         if quantity is not None:
             products = products.order_by("-created_date")[:int(quantity)]
+
+        if location is not None:
+            products = products.filter(location__icontains = location)
+
+        if price is not None:
+            def price_filter(product):
+                if product.price >= float(price):
+                    return True
+                return False
+
+            products= filter(price_filter, products)
 
         if number_sold is not None:
             def sold_filter(product):
