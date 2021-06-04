@@ -1,7 +1,6 @@
   
 from bangazon_reports.views.orders.incomplete_orders import incomplete_order_list
 from bangazon_reports.views.orders.closed_orders import completed_order_list
-from bangazon_reports.views.products.inexpensive_report import inexpensive_product_list
 from bangazon_reports.views.products.expensive_report import expensive_product_list
 from bangazon_reports.views.products.inexpensive_report import inexpensive_product_list
 from django.urls import path
