@@ -118,12 +118,23 @@ class ProductTests(APITestCase):
         }
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
         response = self.client.post(url, data, format='json')
-        json_response = json.loads(response.content)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(json_response["name"], "Kite")
-        self.assertEqual(json_response["price"], 14.99)
-        self.assertEqual(json_response["quantity"], 60)
-        self.assertEqual(json_response["description"], "It flies high")
-        self.assertEqual(json_response["location"], "Pittsburgh")
+
+        url = "/products/1/rate"
+        data = {
+            "rating": 4
+        }
+
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+        url = "/products/1"
+
+        response = self.client.get(url, None, format='json')
+        json_response = json.loads(response.content)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(json_response["average_rating"], response.data['average_rating'])
 

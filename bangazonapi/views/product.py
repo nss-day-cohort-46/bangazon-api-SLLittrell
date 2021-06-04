@@ -355,17 +355,19 @@ class Products(ViewSet):
             except Exception as ex:
                 return HttpResponseServerError(ex, status = status.HTTP_404_NOT_FOUND)
 
-    @action(method =['post'], detail= True)
-    def rate(self,request, pk=None):
+    @action(methods =['post'], detail= True)
+    def rate(self,request, pk):
+        """ Ensures users can rate a product """
         if request.method == "POST":
             rate = ProductRating()
+            rate.product = Product.objects.get(pk=pk)
             rate.customer = Customer.objects.get(user=request.auth.user)
             rate.rating = request.data['rating']
 
         try:
             rate.save()
 
-            return Response(None, status=status.HTTP_204_NO_CONTENT)
+            return Response(None, status=status.HTTP_201_CREATED)
 
         except Exception:
             return Response(None, status=status.HTTP_405_METHOD_NOT_ALLOWED)
